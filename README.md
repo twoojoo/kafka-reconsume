@@ -30,6 +30,7 @@ import { kafkaReconsume } from "kafka-reconsume"
 })()
 ```
 
+- returns the **number of reconsumed messages for each partition**.
 - **Autocommit** is always set to **false**, to ensure programmatic reconsume.
 - By default a **randomly generated consumer group id** will be used, but it can be set proividing the whole consumer config as last optional argument.
 
