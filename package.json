@@ -1,12 +1,12 @@
 {
   "name": "kafka-reconsume",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Tiny messages reconsumer based on kafkajs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "test": "ts-node test/index.test.ts",
+    "build": "rm -rf ./dist && tsc"
   },
   "author": "twoojoo",
   "license": "ISC",
