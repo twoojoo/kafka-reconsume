@@ -1,6 +1,6 @@
 {
   "name": "kafka-reconsume",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "Tiny messages reconsumer based on kafkajs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -8,6 +8,14 @@
     "test": "ts-node test/index.test.ts",
     "build": "rm -rf ./dist && tsc"
   },
+  "keywords": [
+    "kafka",
+    "consume",
+    "reconsume",
+    "offset",
+    "timestamp",
+    "date"
+  ],
   "author": "twoojoo",
   "license": "ISC",
   "dependencies": {
