@@ -7,22 +7,28 @@ A tiny messages reconsumer based on [kafkajs](https://github.com/tulios/kafkajs)
 This will reconsume messages from a specific topic, starting from the given timestamp:
 
 ```typescript
+import { Kafka, ConsumerConfig, ConsumerRunConfig } from "kafkajs"
 import { kafkaReconsume } from "kafka-reconsume"
-import { Kafka } from "kafkajs"
+
+const consumerConfig: ConsumerConfig = { 
+	groupId: "test-reconsume"
+}
+
+const consumerRunConfig: ConsumerRunConfig = {
+	autoCommit: false, 
+	eachMessage: async (item) => {
+		const message = item.message.value!.toString()
+		console.log(item.topic, "==>", message)
+	}
+}
 
 (async function () { 
 	await kafkaReconsume(
 		new Kafka({ brokers: ["localhost:9092"] }), 
 		"my-topic",
 		1202301233, //timestamp
-		{ groupId: "test-reconsume" },
-		{
-			autoCommit: false, 
-			eachMessage: async (item) => {
-				const message = item.message.value!.toString()
-				console.log(item.topic, "==>", message)
-			}
-		}
+		consumerConfig,
+		consumerRunConfig
 	)
 })()
 ```
@@ -37,13 +43,8 @@ await kafkaReconsumeByMillisecOffset(
 	new Kafka({ brokers: ["localhost:9092"] }),  
 	"my-topic",
 	10000, //starts from 10 seconds ago
-	{ groupId: "test-reconsume" },
-	{
-		autoCommit: false,
-		eachMessage: async (item) => {
-			//.....
-		}
-	}
+	consumerConfig,
+	consumerRunConfig
 )
 
 await kafkaReconsumeFromLocalDateTime(
@@ -51,11 +52,7 @@ await kafkaReconsumeFromLocalDateTime(
 	"my-topic",
 	new Date("2023-06-06 00:00:00"),
 	{ groupId: "test-reconsume" },
-	{
-		autoCommit: false,
-		eachMessage: async (item) => {
-			//.....
-		}
-	}
+	consumerConfig,
+	consumerRunConfig
 )
 ```
