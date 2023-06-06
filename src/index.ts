@@ -2,38 +2,80 @@ import {
 	Kafka,
 	ConsumerConfig, 
 	ConsumerRunConfig, 
-	TopicPartitionOffset
+	TopicPartitionOffset,
+	EachMessageHandler
 } from "kafkajs"
 
+import { randomUUID } from "node:crypto"
+
 /**Reconsumes messages for a given topic from a specific locale date*/
-export async function kafkaReconsumeFromLocalDateTime(kafka: Kafka, topic: string, date: Date, consumerConfig: ConsumerConfig, consumerRunConfig: ConsumerRunConfig) {
-	await kafkaReconsume(kafka, topic, date.getTime(), consumerConfig, consumerRunConfig)
+export async function kafkaReconsumeFromLocalDateTime(kafka: Kafka, topic: string, date: Date, eachMessage: EachMessageHandler, consumerConfig?: ConsumerConfig) {
+	await kafkaReconsume(kafka, topic, date.getTime(), eachMessage, consumerConfig)
 }
 
 /**Reconsumes messages for a given topic from a specific offset in milliseconds*/
-export async function kafkaReconsumeByMillisecOffset(kafka: Kafka, topic: string, offsetMilliseconds: number, consumerConfig: ConsumerConfig, consumerRunConfig: ConsumerRunConfig) {
-	await kafkaReconsume(kafka, topic, Date.now() - offsetMilliseconds, consumerConfig, consumerRunConfig)
+export async function kafkaReconsumeByMillisecOffset(kafka: Kafka, topic: string, offsetMilliseconds: number, eachMessage: EachMessageHandler, consumerConfig?: ConsumerConfig) {
+	await kafkaReconsume(kafka, topic, Date.now() - offsetMilliseconds, eachMessage, consumerConfig)
 }
 
 /**Reconsumes messages for a given topic from a specific timestamp*/
-export async function kafkaReconsume(kafka: Kafka, topic: string, timestampMs: number, consumerConfig: ConsumerConfig, consumerRunConfig: ConsumerRunConfig) {
-	const kAdmin = kafka.admin()
-	await kAdmin.connect()
+export async function kafkaReconsume(kafka: Kafka, topic: string, timestampMs: number, eachMessage: EachMessageHandler, consumerConfig?: ConsumerConfig) {
+	return new Promise<{ [partion: string]: number }>(async (resolve) => {
+		const admin = kafka.admin()
+		await admin.connect()
+		
+		const offsetsByTimestamp = await admin.fetchTopicOffsetsByTimestamp(topic, timestampMs)
+		
+		if (!consumerConfig) {
+			consumerConfig = { groupId: "kafka-reconsume-" + randomUUID(), }
+		}
 
-	console.log(new Date(timestampMs))
+		const consumer = kafka.consumer(consumerConfig)
+		await consumer.connect()
+		
+		const maxMessages: { [partion: string]: number } = {}
+		const offsetCounter: { [partion: string]: number } = {}
 
-	const offsets = await kAdmin.fetchTopicOffsetsByTimestamp(topic, timestampMs)
+		const topicOffsets = await admin.fetchTopicOffsets(topic);
 
-	const consumer = kafka.consumer(consumerConfig)
-	await consumer.connect()
+		topicOffsets.forEach(item => { 
+			const partition = item.partition.toString()
+			maxMessages[partition] = parseInt(item.high) - parseInt(item.low)
+			offsetCounter[partition] = 0
+		})
+		
+		const runConfig: ConsumerRunConfig = {
+			autoCommit: false,
+			eachMessage: async (item) => {
+				const partition = item.partition.toString()
+				offsetCounter[partition]++
+		
+				await eachMessage(item)
+		
+				const isEnd = checkReconsumeEnd(offsetCounter, maxMessages)
+				if (isEnd) resolve(offsetCounter)
+			}
+		}
+	
+		//the fromBeginning option should be
+		//useless when seeking messages
+		consumer.subscribe({ topic, fromBeginning: true })
+		consumer.run(runConfig)
+		
+		for (let partitionOffset of offsetsByTimestamp) {
+			Object.defineProperty(partitionOffset, "topic", { value: topic })
+			consumer.seek(partitionOffset as TopicPartitionOffset)
+		}
+	})
+}
 
-	//the fromBeginning option should be
-	//useless when seeking messages
-	consumer.subscribe({ topic })
-	consumer.run(consumerRunConfig)
 
-	for (let partitionOffset of offsets) {
-		Object.defineProperty(partitionOffset, "topic", { value: topic })
-		consumer.seek(partitionOffset as TopicPartitionOffset)
+function checkReconsumeEnd(offsetCounter: { [partion: string]: number }, maxMessages: { [partion: string]: number }): boolean {
+	for (const partition in offsetCounter) {
+		if (offsetCounter[partition] == maxMessages[partition]) {
+			return true
+		}
 	}
+
+	return false
 }

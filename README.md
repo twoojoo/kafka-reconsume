@@ -10,28 +10,28 @@ This will reconsume messages from a specific topic, starting from the given time
 import { Kafka, ConsumerConfig, ConsumerRunConfig } from "kafkajs"
 import { kafkaReconsume } from "kafka-reconsume"
 
-const consumerConfig: ConsumerConfig = { 
-	groupId: "test-reconsume"
-}
-
-const consumerRunConfig: ConsumerRunConfig = {
-	autoCommit: false, 
-	eachMessage: async (item) => {
-		const message = item.message.value!.toString()
-		console.log(item.topic, "==>", message)
-	}
-}
-
 (async function () { 
-	await kafkaReconsume(
+	const result = await kafkaReconsume(
 		new Kafka({ brokers: ["localhost:9092"] }), 
 		"my-topic",
 		1202301233, //timestamp
-		consumerConfig,
-		consumerRunConfig
+		async (item) => {
+			const message = item.message.value!.toString()
+			console.log(item.topic, "==>", message)
+		}
 	)
+
+	for (const partition in result) {
+		console.log(
+			"partion:", partition,
+			"messages:", result[partition]
+		)
+	}
 })()
 ```
+
+- **Autocommit** is always set to **false**, to ensure programmatic reconsume.
+- By default a **randomly generated consumer group id** will be used, but it can be set proividing the whole consumer config as last optional argument.
 
 ## Other utilities
 
@@ -43,8 +43,7 @@ await kafkaReconsumeByMillisecOffset(
 	new Kafka({ brokers: ["localhost:9092"] }),  
 	"my-topic",
 	10000, //starts from 10 seconds ago
-	consumerConfig,
-	consumerRunConfig
+	async (item) => { /*....*/}
 )
 
 await kafkaReconsumeFromLocalDateTime(
@@ -52,7 +51,6 @@ await kafkaReconsumeFromLocalDateTime(
 	"my-topic",
 	new Date("2023-06-06 00:00:00"),
 	{ groupId: "test-reconsume" },
-	consumerConfig,
-	consumerRunConfig
+	async (item) => { /*....*/}
 )
 ```
