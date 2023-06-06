@@ -4,6 +4,10 @@ A tiny messages reconsumer based on [kafkajs](https://github.com/tulios/kafkajs)
 
 ## Basic usage
 
+```bash
+npm install kafka-reconsume
+```
+
 This will reconsume messages from a specific topic, starting from the given timestamp:
 
 ```typescript
