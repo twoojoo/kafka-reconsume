@@ -20,7 +20,7 @@ import { Kafka } from "kafkajs"
 
 	for (const partition in result) {
 		console.log(
-			"partion:", partition,
+			"partition:", partition,
 			"messages:", result[partition]
 		)
 	}
