@@ -29,14 +29,16 @@ const kafka =
 })()
 ```
 
-## Other functions
+## Other utilities
+
+Just two little wrappers around the main function:
 
 ```typescript
 
 await kafkaReconsumeByMillisecOffset(
 	new Kafka({ brokers: ["localhost:9092"] }),  
 	"my-topic",
-	50000000,
+	10000, //starts from 10 seconds ago
 	{ groupId: "test-reconsume" },
 	{
 		autoCommit: false,
