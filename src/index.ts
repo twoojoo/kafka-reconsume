@@ -5,10 +5,12 @@ import {
 	TopicPartitionOffset
 } from "kafkajs"
 
+/**Reconsumes messages for a given topic from a specific locale date*/
 export async function kafkaReconsumeFromLocalDateTime(kafka: Kafka, topic: string, date: Date, consumerConfig: ConsumerConfig, consumerRunConfig: ConsumerRunConfig) {
 	await kafkaReconsume(kafka, topic, date.getTime(), consumerConfig, consumerRunConfig)
 }
 
+/**Reconsumes messages for a given topic from a specific offset in milliseconds*/
 export async function kafkaReconsumeByMillisecOffset(kafka: Kafka, topic: string, offsetMilliseconds: number, consumerConfig: ConsumerConfig, consumerRunConfig: ConsumerRunConfig) {
 	await kafkaReconsume(kafka, topic, Date.now() - offsetMilliseconds, consumerConfig, consumerRunConfig)
 }
