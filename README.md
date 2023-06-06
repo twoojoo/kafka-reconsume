@@ -11,12 +11,14 @@ npm install kafka-reconsume
 This will reconsume messages from a specific topic, starting from the given timestamp:
 
 ```typescript
-import { Kafka, ConsumerConfig, ConsumerRunConfig } from "kafkajs"
 import { kafkaReconsume } from "kafka-reconsume"
+import { Kafka } from "kafkajs"
+
+const kafka = new Kafka({ brokers: ["localhost:9092"] }), 
 
 (async function () { 
 	const result = await kafkaReconsume(
-		new Kafka({ brokers: ["localhost:9092"] }), 
+		kafka,
 		"my-topic",
 		1202301233, //timestamp
 		async (item) => {
@@ -45,14 +47,14 @@ Just two little wrappers around the main function:
 ```typescript
 
 await kafkaReconsumeByMillisecOffset(
-	new Kafka({ brokers: ["localhost:9092"] }),  
+	kafka,
 	"my-topic",
 	10000, //starts from 10 seconds ago
 	async (item) => { /*....*/}
 )
 
 await kafkaReconsumeFromLocalDateTime(
-	new Kafka({ brokers: ["localhost:9092"] }),  
+	kafka,
 	"my-topic",
 	new Date("2023-06-06 00:00:00")
 	async (item) => { /*....*/}

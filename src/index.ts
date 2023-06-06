@@ -9,17 +9,17 @@ import {
 import { randomUUID } from "node:crypto"
 
 /**Reconsumes messages for a given topic from a specific locale date*/
-export async function kafkaReconsumeFromLocalDateTime(kafka: Kafka, topic: string, date: Date, eachMessage: EachMessageHandler, consumerConfig?: ConsumerConfig) {
-	await kafkaReconsume(kafka, topic, date.getTime(), eachMessage, consumerConfig)
+export async function kafkaReconsumeFromLocalDateTime(kafka: Kafka, topic: string, date: Date, eachMessage: EachMessageHandler, consumerConfig?: ConsumerConfig): Promise<{ [partion: string]: number }> {
+	return await kafkaReconsume(kafka, topic, date.getTime(), eachMessage, consumerConfig)
 }
 
 /**Reconsumes messages for a given topic from a specific offset in milliseconds*/
-export async function kafkaReconsumeByMillisecOffset(kafka: Kafka, topic: string, offsetMilliseconds: number, eachMessage: EachMessageHandler, consumerConfig?: ConsumerConfig) {
-	await kafkaReconsume(kafka, topic, Date.now() - offsetMilliseconds, eachMessage, consumerConfig)
+export async function kafkaReconsumeByMillisecOffset(kafka: Kafka, topic: string, offsetMilliseconds: number, eachMessage: EachMessageHandler, consumerConfig?: ConsumerConfig): Promise<{ [partion: string]: number }> {
+	return await kafkaReconsume(kafka, topic, Date.now() - offsetMilliseconds, eachMessage, consumerConfig)
 }
 
 /**Reconsumes messages for a given topic from a specific timestamp*/
-export async function kafkaReconsume(kafka: Kafka, topic: string, timestampMs: number, eachMessage: EachMessageHandler, consumerConfig?: ConsumerConfig) {
+export async function kafkaReconsume(kafka: Kafka, topic: string, timestampMs: number, eachMessage: EachMessageHandler, consumerConfig?: ConsumerConfig): Promise<{ [partion: string]: number }> {
 	return new Promise<{ [partion: string]: number }>(async (resolve) => {
 		const admin = kafka.admin()
 		await admin.connect()
