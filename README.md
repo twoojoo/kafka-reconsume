@@ -7,7 +7,7 @@ A tiny messages reconsumer based on [kafkajs](https://github.com/tulios/kafkajs)
 This will reconsume messages from a specific topic, starting from the given timestamp:
 
 ```typescript
-import { kafkaReconsume } from "kafka-reconsum"
+import { kafkaReconsume } from "kafka-reconsume"
 import { Kafka } from "kafkajs"
 
 const kafka = 
