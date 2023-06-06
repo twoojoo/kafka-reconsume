@@ -10,8 +10,6 @@ This will reconsume messages from a specific topic, starting from the given time
 import { kafkaReconsume } from "kafka-reconsume"
 import { Kafka } from "kafkajs"
 
-const kafka = 
-
 (async function () { 
 	await kafkaReconsume(
 		new Kafka({ brokers: ["localhost:9092"] }), 
