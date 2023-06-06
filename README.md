@@ -49,8 +49,7 @@ await kafkaReconsumeByMillisecOffset(
 await kafkaReconsumeFromLocalDateTime(
 	new Kafka({ brokers: ["localhost:9092"] }),  
 	"my-topic",
-	new Date("2023-06-06 00:00:00"),
-	{ groupId: "test-reconsume" },
+	new Date("2023-06-06 00:00:00")
 	async (item) => { /*....*/}
 )
 ```
