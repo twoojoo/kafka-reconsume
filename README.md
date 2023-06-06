@@ -28,3 +28,34 @@ const kafka =
 	)
 })()
 ```
+
+## Other functions
+
+```typescript
+
+await kafkaReconsumeByMillisecOffset(
+	new Kafka({ brokers: ["localhost:9092"] }),  
+	"my-topic",
+	50000000,
+	{ groupId: "test-reconsume" },
+	{
+		autoCommit: false,
+		eachMessage: async (item) => {
+			//.....
+		}
+	}
+)
+
+await kafkaReconsumeFromLocalDateTime(
+	new Kafka({ brokers: ["localhost:9092"] }),  
+	"my-topic",
+	new Date("2023-06-06 00:00:00"),
+	{ groupId: "test-reconsume" },
+	{
+		autoCommit: false,
+		eachMessage: async (item) => {
+			//.....
+		}
+	}
+)
+```
